@@ -1,21 +1,117 @@
-import React, { useState } from 'react'
+import React, { useEffect,useState } from 'react'
 import Tagsinput from '../Components/Tagsinput'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axiosInstance from '../Utilis/axiosInstance';
 
-function Addeditnotes({arrayOfNotes,setarrayOfNotes}) {
+
+
+function Addeditnotes({arrayOfNotes,setarrayOfNotes,selectedNote ,setallNotes, allNotes,setOpen, getAllNotes}) {
 
     const [title,settitle]=useState('');
     const [content,setcontent]=useState('');
     const [tags,settags]=useState([]);
     const [error,seterror]=useState(null);
 
-    const addNewNote = () => {
-      const newNote = {
-        title: title,
-        content: content,
-        tags: tags,
-      };
+    // Populate the fields when selectedNote is available
+  useEffect(() => {
+    if (selectedNote) {
+      settitle(selectedNote.title || '');
+      setcontent(selectedNote.content || '');
+      settags(Array.isArray(selectedNote.tags) ? selectedNote.tags : []);
+    }
+  }, [selectedNote]);
+
     
-      setarrayOfNotes([...arrayOfNotes, newNote]);
+  const notify = () => selectedNote? toast("Edit success !"):(toast("Add is success !"));
+
+//// for edit note ///
+
+  const editNote=async()=>{
+    const noteId=selectedNote._id;
+    console.log(selectedNote._id);
+
+
+    try {
+      var contents = {
+         title,
+         content,
+         tags
+       };
+       const response=await axiosInstance.put('/notes/edit-note/'+ noteId, contents,
+         {}
+     );
+ 
+   
+     if(response.data && response.data.note)
+     {
+      getAllNotes();
+      setOpen(false);
+     
+
+     ///
+     }
+       
+     } catch (error) {
+       if(error.response && error.response.data && error.response.data.message)
+       {
+         seterror(error.response.data.message)
+       }
+       else{
+         seterror('unexpected error');
+       }
+       
+     }
+
+  }
+
+    const addNewNote = async() => {
+      // const newNote = {
+      //   title: title,
+      //   content: content,
+      //   tags: tags,
+
+
+        
+      // };
+    
+      // setarrayOfNotes([...arrayOfNotes, newNote]);
+      notify();
+      try {
+        var contents = {
+           title,
+           content,
+           tags
+         };
+         const response=await axiosInstance.post('/notes/add-note', contents,
+           {}
+       );
+   
+     
+       if(response.data && response.data.note)
+       {
+        setallNotes([...allNotes,contents])
+        setOpen(false);
+       
+
+       
+       }
+         
+       } catch (error) {
+         if(error.response && error.response.data && error.response.data.message)
+         {
+           seterror(error.response.data.message)
+         }
+         else{
+           seterror('unexpected error');
+         }
+         
+       }
+
+
+    
+    
+   
     };
     
 
@@ -30,7 +126,11 @@ function Addeditnotes({arrayOfNotes,setarrayOfNotes}) {
         return;
 
       }
-      addNewNote();
+      
+      if(selectedNote ? editNote(): addNewNote())
+     
+      
+      
       seterror('');
     }
 
@@ -38,11 +138,11 @@ function Addeditnotes({arrayOfNotes,setarrayOfNotes}) {
   return (
     <div>
         <div className='flex flex-col gap-2'>
-            <label className='input-label text-slate-600'>Title</label>
+            <label className='input-label text-slate-600 text-2xl'>Title</label>
             <input 
             type='text'
-            className='text-2xl text-slate-950 outline-none'
-            placeholder='Go to gym at 5'
+            className='text-xl text-slate-950 outline-none'
+            placeholder='write title'
             value={title}
             onChange={(e)=>settitle(e.target.value)}
             >
@@ -52,7 +152,7 @@ function Addeditnotes({arrayOfNotes,setarrayOfNotes}) {
         </div>
         
         <div className='flex flex-col gap-2 mt-4'>
-        <label className='input-label'>Content</label>
+        <label className='input-label text-2xl'>Content</label>
         <textarea
         type='text'
         className='text-sm text text-slate-950 outline-none bg-slate-50 rounded p-3'
@@ -75,8 +175,12 @@ function Addeditnotes({arrayOfNotes,setarrayOfNotes}) {
   
 }
 
+ <button className='mt-10 btn-primary font-medium'
+  onClick={handleAddNotes}   >
+  <ToastContainer />
+  {selectedNote ? 'Update Note' : 'Add Note'}</button>
+ 
 
- <button className='mt-10 btn-primary font-medium' onClick={handleAddNotes}>ADD</button>
 
     </div>
   )

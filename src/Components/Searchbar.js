@@ -2,11 +2,12 @@ import React from 'react'
 import { IoSearchOutline } from "react-icons/io5";
 import { RxCross1 } from "react-icons/rx";
 
-export default function Searchbar({value,onChnage,handleclear}) {
+export default function Searchbar({value,onChnage,handleclear,handleSearch}) {
  
 
     const handleclick=()=>{
 
+      handleSearch();
     }
 
 
@@ -25,7 +26,7 @@ export default function Searchbar({value,onChnage,handleclear}) {
         
         }
        
-        <IoSearchOutline className='text-slate-500 hover:text-black cursor-pointer' size={22} onClick={handleclick} />
+        <IoSearchOutline className='text-slate-500 hover:text-black cursor-pointer' size={22} onChange={handleclick} />
       
     </div>
   )

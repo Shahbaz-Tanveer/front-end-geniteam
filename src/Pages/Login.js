@@ -29,31 +29,32 @@ function Login() {
 
     //API  call for my future code
 
-    // try {
-    //   const response=await axiosInstance.post('/login',{
-    //     email:email,
-    //     password:password
-    // });
+    try {
+     const content = {
+        email:email,
+        password:password
+      };
+      const response=await axiosInstance.post('/auth/login', content,
+        {}
+    );
 
-    // //handle successful login response
-    // if(response.data && response.data.accessToken)
-    // {
-    //   localStorage.setItem('Token',response.data.accessToken);
-    //   navigate('/')
-    // }
+    //handle successful login response
+    if(response.data && response.data.accessToken)
+    {
+      localStorage.setItem('token',response.data.accessToken);
+      navigate('/')
+    }
       
-    // } catch (error) {
-    //   if(error.response && error.response.data && error.response.data.message)
-    //   {
-    //     seterror(error.response.data.message)
-    //   }
-    //   else{
-    //     seterror('unexpected error');
-    //   }
+    } catch (error) {
+      if(error.response && error.response.data && error.response.data.message)
+      {
+        seterror(error.response.data.message)
+      }
+      else{
+        seterror('unexpected error');
+      }
       
-    // }
-
-
+    }
 
 
   }

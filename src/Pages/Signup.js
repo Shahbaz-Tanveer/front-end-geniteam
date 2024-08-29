@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import PasswordInput from '../Components/PasswordInput';
 import { Link } from 'react-router-dom';
 import { validatEmail } from '../Utilis/helper'
+import axiosInstance from '../Utilis/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 export default function Signup() {
 
@@ -9,6 +11,7 @@ export default function Signup() {
     const [email,setemail]=useState('');
     const [password,setpassword]=useState('');
     const [error,seterror]=useState('');
+    const navigate=useNavigate();
 
 
     const handlesignup=async(e)=>{
@@ -19,6 +22,19 @@ if(!name)
     seterror('enter the name');
     return;
 }
+
+const words = name.trim().split(/\s+/);
+
+// Check if the name contains only one word
+if (words.length < 2) {
+  seterror('Please enter both a first name and a last name with space.');
+  return;
+}
+
+
+
+
+
 
 if(!validatEmail(email))
     {
@@ -32,9 +48,46 @@ if(!validatEmail(email))
         seterror('enter the password')
         return;
     }
+
 seterror('');
 
 // signup API call
+try {
+  const content = {
+    fullName:name,
+     email:email,
+     password:password
+   };
+   const response=await axiosInstance.post('/auth/create-account', content,
+     {}
+ );
+
+ //handle successful login response
+ if(response.data && response.data.error)
+ {
+   seterror(response.data.error);
+   return
+ }
+ if(response.data && response.data.accessToken)
+ {
+  localStorage.setItem('token',response.data.accessToken)
+  navigate('/')
+
+ }
+ 
+   
+ } catch (error) {
+   if(error.response && error.response.data && error.response.data.message)
+   {
+     seterror(error.response.data.message)
+   }
+   else{
+     seterror('unexpected error');
+   }
+   
+ }
+
+
 
 
     }
@@ -44,10 +97,10 @@ seterror('');
     <div className='w-96 border rounded bg-white px-7 py-10'> 
   <form onSubmit={handlesignup}>
 
-    <h4 className='text-2xl mb-7'>Login</h4>
+    <h4 className='text-2xl mb-7'>Signup</h4>
 
    {/* // for name */}
-    <input type='text' placeholder='name' className='input-box'
+    <input type='text' placeholder='Full name ' className='input-box'
     value={name}
     onChange={(e)=>setname(e.target.value)}>
     </input>
